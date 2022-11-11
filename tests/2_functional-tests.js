@@ -15,9 +15,6 @@ suite('Functional Tests', function() {
            "assigned_to":"Arun",
            "status_text":"Critical"})
     .end(function(err, res){
-      if(err){
-        console.error(err);
-      }
       assert.equal(res.body.issue_title,'unix');
       done();
     })
@@ -30,9 +27,6 @@ suite('Functional Tests', function() {
            "issue_text":"testing for projectname",
            "created_by":"user"})
     .end(function(err, res){
-      if(err){
-        console.error(err);
-      }
       assert.equal(res.body.issue_title,'unix');
       done();
     })
@@ -44,11 +38,8 @@ suite('Functional Tests', function() {
     .send({"issue_title":"unix",
            "issue_text":"testing for projectname"})
     .end(function(err, res){
-      if(err){
-        console.error(err);
-      }
       assert.equal(res.body.error,'required field(s) missing');
       done();
     })
-  })
+  });
 });
