@@ -24,7 +24,14 @@ module.exports = function (app) {
   
     .get(function (req, res){
       let project = req.params.project;
-      
+      console.log(req.query);
+      Issue.find(req.query,function(err, data) {
+		    if (err){
+          console.error(err);
+          return res.json({ error: 'Some Error' });
+        }
+    		return res.json(data);
+      });
     })
     
     .post(function (req, res){
@@ -32,12 +39,20 @@ module.exports = function (app) {
       console.log(project);
       
       let issueData = req.body;
-
       if(issueData.issue_title == undefined || 
         issueData.issue_text == undefined ||
         issueData.created_by == undefined ){
         return res.json({ error: 'required field(s) missing' });
       }
+
+       if(issueData.assigned_to == undefined){
+         issueData.assigned_to = "";
+       }
+
+      console.log(issueData.status_text );
+      if(issueData.status_text == undefined){
+         issueData.status_text = "";
+       }
       
       issueData.open=true;
       issueData.created_on=new Date();
@@ -45,24 +60,79 @@ module.exports = function (app) {
       
       let IssueDetail = new Issue(issueData);
   		IssueDetail.save(function(err, data) {
-  			if (err) 
+  			if(err) 
         {
           console.error(err); 
-          return res.json({});
+          return res.json({ error: 'Some Error' });
         }
-        //console.log(issueData);
-  			return res.json(issueData);
+        //console.log(data);
+  			return res.json(data);
   		});
     })
     
     .put(function (req, res){
       let project = req.params.project;
-      
+      let issueData = req.body;
+      let _id = issueData._id;
+      console.log(issueData._id);
+      if(_id == '' || _id == undefined){
+        return res.json({ error: 'missing _id' });
+      }
+      else
+      {
+        let issueArr = Object.keys(issueData);
+        issueArr = issueArr.filter(name => name != '_id' && issueData[name] != '');
+        console.log(issueData);
+        console.log(issueArr.length);
+        if(issueArr.length == 0){
+          res.json({ error: 'no update field(s) sent', '_id': _id });
+        }
+        else
+        {
+          let updateData = {};
+          for(let i=0; i<issueArr.length; i++){
+            updateData[issueArr[i]] = issueData[issueArr[i]];
+          }
+          updateData.updated_on=new Date();
+          console.log(updateData);
+          Issue.findByIdAndUpdate(_id, updateData ,function(err, data){
+            console.log(err);
+            if(err) 
+            {
+              console.error(err);
+              //return res.json({ error: 'could not update', '_id': _id });
+            }
+            else
+            {
+              return res.json({ result: 'successfully updated', '_id': _id });
+            }
+          });
+        }
+      }
     })
     
     .delete(function (req, res){
       let project = req.params.project;
-      
+      let issueData = req.body;
+      let _id = issueData._id;
+      console.log(_id);
+      if(_id == '' || _id == undefined ){
+        return res.json({ error: 'missing _id'});
+      }
+      else
+      {
+        Issue.findByIdAndDelete(issueData._id,function(err, data){
+          if(err) 
+          {
+            console.error(err);
+            //return res.json({ error: 'could not delete', '_id': _id });
+          }
+          else
+          {
+            return res.json({ result: 'successfully deleted', '_id': _id });
+          }
+        });
+      }
     });
     
 };

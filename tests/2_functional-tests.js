@@ -6,6 +6,7 @@ const server = require('../server');
 chai.use(chaiHttp);
 
 suite('Functional Tests', function() {
+  //POST
   test('an issue with all fields',function(done){
     chai.request(server)
     .post('/api/issues/apitest')
@@ -42,4 +43,33 @@ suite('Functional Tests', function() {
       done();
     })
   });
+
+  //GET
+  test('View issues on a project',function(done){
+    chai.request(server)
+    .get('/api/issues/apitest')
+    .end(function(err, res){
+      assert.equal(res.status, 200);
+      done();
+    })
+  });
+
+  test('View issues on a project with one filter',function(done){
+    chai.request(server)
+    .get('/api/issues/apitest?issue_title=unix')
+    .end(function(err, res){
+      assert.equal(res.status, 200);
+      done();
+    })
+  });
+  
+  test('View issues on a project with multiple filters',function(done){
+    chai.request(server)
+    .get('/api/issues/apitest?issue_title=unix&open=false')
+    .end(function(err, res){
+      assert.equal(res.status, 200);
+      done();
+    })
+  });
+  
 });
