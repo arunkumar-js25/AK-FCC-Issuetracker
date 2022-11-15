@@ -5,6 +5,7 @@ let mongoose = require('mongoose');
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 
 let issueSchema = new mongoose.Schema({
+    projectname : { type: String },
     issue_title : { type: String },
     issue_text: { type: String },
     created_on: { type: Date },
@@ -24,8 +25,12 @@ module.exports = function (app) {
   
     .get(function (req, res){
       let project = req.params.project;
-      console.log(req.query);
-      Issue.find(req.query,function(err, data) {
+
+      let filter = req.query;
+      filter.projectname = project == undefined? '' : project;
+      console.log(filter);
+      Issue.find(filter).select({projectname:0,_v:0})
+        .exec(function(err, data) {
 		    if (err){
           console.error(err);
           return res.json({ error: 'Some Error' });
@@ -39,6 +44,8 @@ module.exports = function (app) {
       console.log(project);
       
       let issueData = req.body;
+      issueData.projectname = project;
+      
       if(issueData.issue_title == undefined || 
         issueData.issue_text == undefined ||
         issueData.created_by == undefined ){
@@ -73,6 +80,8 @@ module.exports = function (app) {
     .put(function (req, res){
       let project = req.params.project;
       let issueData = req.body;
+      issueData.projectname = project;
+      
       let _id = issueData._id;
       console.log(issueData._id);
       if(_id == '' || _id == undefined){
@@ -81,7 +90,7 @@ module.exports = function (app) {
       else
       {
         let issueArr = Object.keys(issueData);
-        issueArr = issueArr.filter(name => name != '_id' && issueData[name] != '');
+        issueArr = issueArr.filter(name =>  name != '_id' && name != 'projectname' && issueData[name] != '');
         console.log(issueData);
         console.log(issueArr.length);
         if(issueArr.length == 0){
@@ -95,12 +104,12 @@ module.exports = function (app) {
           }
           updateData.updated_on=new Date();
           console.log(updateData);
-          Issue.findByIdAndUpdate(_id, updateData ,function(err, data){
+          Issue.findByIdAndUpdate(_id, updateData, { new: true }, function(err, data){
             console.log(err);
-            if(err) 
+            if(err || !data) 
             {
-              console.error(err);
-              //return res.json({ error: 'could not update', '_id': _id });
+              //console.error(err);
+              return res.json({ error: 'could not update', '_id': _id });
             }
             else
             {
@@ -114,6 +123,7 @@ module.exports = function (app) {
     .delete(function (req, res){
       let project = req.params.project;
       let issueData = req.body;
+      
       let _id = issueData._id;
       console.log(_id);
       if(_id == '' || _id == undefined ){
@@ -122,10 +132,10 @@ module.exports = function (app) {
       else
       {
         Issue.findByIdAndDelete(issueData._id,function(err, data){
-          if(err) 
+          if(err || !data) 
           {
-            console.error(err);
-            //return res.json({ error: 'could not delete', '_id': _id });
+            //console.error(err);
+            return res.json({ error: 'could not delete', '_id': _id });
           }
           else
           {
