@@ -71,5 +71,119 @@ suite('Functional Tests', function() {
       done();
     })
   });
+
+  //PUT
+  test('Update one field on an issue:',function(done){
+    chai.request(server)
+    .put('/api/issues/apitest')
+    .send({ '_id': '6372ee44392c8d5251ec1caf', 'issue_title': 'put case 1' })
+    .end(function(err, res){
+       if(err) 
+       {
+          console.error(err);
+         done();
+       }
+      assert.equal(res.status, 200);
+      done();
+    })
+  });
+  test('Update multiple fields on an issue',function(done){
+    chai.request(server)
+    .put('/api/issues/apitest')
+    .send({ '_id': '6372ee6a92842414094ea3f6', 'issue_title': 'put case 2', 'issue_text':'put case 2' })
+    .end(function(err, res){
+      if(err) 
+       {
+          console.error(err);
+         done();
+       }
+      assert.equal(res.status, 200);
+      done();
+    })
+  });
+  test('Update an issue with missing _id',function(done){
+    chai.request(server)
+    .put('/api/issues/apitest')
+    .end(function(err, res){
+      if(err) 
+       {
+          console.error(err);
+         done();
+       }
+      assert.equal(res.status, 200);
+      done();
+    })
+  });
+  test('Update an issue with no fields to update',function(done){
+    chai.request(server)
+    .put('/api/issues/apitest')
+    .send({ '_id': '6372ee6a92842414094ea3f6'})
+    .end(function(err, res){
+      if(err) 
+       {
+          console.error(err);
+         done();
+       }
+      assert.equal(res.status, 200);
+      done();
+    })
+  });
+  test('Update an issue with an invalid _id',function(done){
+    chai.request(server)
+    .put('/api/issues/apitest')
+    .send({ '_id': 'asd'})
+    .end(function(err, res){
+      if(err) 
+       {
+          console.error(err);
+         done();
+       }
+      assert.equal(res.status, 200);
+      done();
+    })
+  });
+
+  //DELETE
+  test('Delete an issue',function(done){
+    chai.request(server)
+    .delete('/api/issues/apitest')
+    .send({'_id':'6372eda4285651aff30dd58a'})
+    .end(function(err, res){
+      if(err) 
+       {
+          console.error(err);
+         done();
+       }
+      assert.equal(res.status, 200);
+      done();
+    })
+  });
+  test('Delete an issue with an invalid _id',function(done){
+    chai.request(server)
+    .delete('/api/issues/apitest')
+    .send({'_id':'6372eda4285651afdd58a'})
+    .end(function(err, res){
+      if(err) 
+       {
+          console.error(err);
+         done();
+       }
+      assert.equal(res.status, 200);
+      done();
+    })
+  });
+  test('Delete an issue with missing _id',function(done){
+    chai.request(server)
+    .delete('/api/issues/apitest')
+    .end(function(err, res){
+      if(err) 
+       {
+          console.error(err);
+         done();
+       }
+      assert.equal(res.status, 200);
+      done();
+    })
+  });
   
 });
