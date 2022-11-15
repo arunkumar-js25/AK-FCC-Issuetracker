@@ -31,11 +31,14 @@ module.exports = function (app) {
       console.log(filter);
       Issue.find(filter).select({projectname:0,_v:0})
         .exec(function(err, data) {
-		    if (err){
+		    if (err || !data){
           console.error(err);
           return res.json({ error: 'Some Error' });
         }
-    		return res.json(data);
+        else{
+            return res.json(data);
+        }
+    		
       });
     })
     
@@ -69,11 +72,13 @@ module.exports = function (app) {
   		IssueDetail.save(function(err, data) {
   			if(err) 
         {
-          console.error(err); 
+          //console.error(err); 
           return res.json({ error: 'Some Error' });
         }
-        //console.log(data);
-  			return res.json(data);
+        else{
+          //console.log(data);
+    			return res.json(data);
+        }
   		});
     })
     
@@ -90,20 +95,25 @@ module.exports = function (app) {
       else
       {
         let issueArr = Object.keys(issueData);
-        issueArr = issueArr.filter(name =>  name != '_id' && name != 'projectname' && issueData[name] != '');
-        console.log(issueData);
-        console.log(issueArr.length);
-        if(issueArr.length == 0){
+        let updateData = {};
+        let counter = 0;
+        for(let i=0;i<issueArr.length;i++){
+          let name = issueArr[i];
+          let value = issueData[name];
+          if(name != '_id' && name != 'projectname' && value != ''){
+            updateData[name] = value;
+            counter=counter+1;
+          }
+        }
+
+        console.log(updateData);
+        console.log(counter);
+        if(counter == 0){
           res.json({ error: 'no update field(s) sent', '_id': _id });
         }
         else
         {
-          let updateData = {};
-          for(let i=0; i<issueArr.length; i++){
-            updateData[issueArr[i]] = issueData[issueArr[i]];
-          }
           updateData.updated_on=new Date();
-          console.log(updateData);
           Issue.findByIdAndUpdate(_id, updateData, { new: true }, function(err, data){
             console.log(err);
             if(err || !data) 
